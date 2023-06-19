@@ -1,4 +1,4 @@
-## GraphQL-Yoga (ts) with Prisma, ErrorHandling, Validator
+## GraphQL-Yoga (ts) with Prisma, ErrorHandling, Validation, Filtering and Pagination
 
 
 Prisma:
@@ -26,6 +26,28 @@ query {
       body
     }
   }
+  
+  links(filterNeedle:"QL"){
+    id
+    url
+    description
+    comments {
+      id
+      body
+    }
+  }
+  
+    links(take: 1, skip: 1){
+    id
+    url
+    description
+    comments {
+      id
+      body
+    }
+  }
+  
+  
   
   link(id: 1){
     url

@@ -1,6 +1,5 @@
 //import { makeExecutableSchema } from '@graphql-tools/schema'
-import { createSchema } from "graphql-yoga";
-import { GraphQLError } from 'graphql';
+import { createGraphQLError, createSchema } from "graphql-yoga";
 import { Prisma } from "@prisma/client";
 import validator from 'validator';
 const typeDefs = `
@@ -19,7 +18,7 @@ const typeDefs = `
       
       type Query {
         hello: String!
-        links: [Link!]!
+        links(filterNeedle: String, skip: Int, take: Int): [Link!]!
         link(id: ID): Link
         comments: [Comment!]!
         comment(id: ID!): Comment
@@ -40,21 +39,51 @@ const parseIntSafe = (value) => {
     }
     return null;
 };
+const applyTakeConstraints = (params) => {
+    if (params.value < params.min || params.value > params.max) {
+        throw createGraphQLError(`'take' argument value '${params.value}' is outside the valid range of '${params.min}' to '${params.max}'.`);
+    }
+    return params.value;
+};
+const applySkipConstraints = (value) => {
+    if (value < 0) {
+        throw createGraphQLError(`'skip' argument value '${value}' is less of 0.`);
+    }
+    return value;
+};
 const resolvers = {
     Query: {
         hello: () => 'Hello from Yoga!',
-        async links(parent, args, context) {
-            return context.prisma.link.findMany();
+        links: async (parent, args, context) => {
+            const where = args.filterNeedle
+                ? {
+                    OR: [
+                        { description: { contains: args.filterNeedle } },
+                        { url: { contains: args.filterNeedle } }
+                    ]
+                }
+                : {};
+            const take = applyTakeConstraints({
+                min: 1,
+                max: 50,
+                value: args.take ?? 30
+            });
+            const skip = applySkipConstraints(args.skip ?? 0);
+            return context.prisma.link.findMany({
+                where,
+                skip: args.skip,
+                take
+            });
         },
-        async link(parent, args, context) {
+        link: async (parent, args, context) => {
             return context.prisma.link.findUnique({
                 where: { id: parseInt(args.id) }
             });
         },
-        async comments(parent, args, context) {
+        comments: async (parent, args, context) => {
             return context.prisma.comment.findMany();
         },
-        async comment(parent, args, context) {
+        comment: async (parent, args, context) => {
             return context.prisma.comment.findUnique({
                 where: { id: parseInt(args.id) }
             });
@@ -84,12 +113,14 @@ const resolvers = {
         },
     },
     Mutation: {
-        async postLink(parent, args, context) {
+        postLink: async (parent, args, context) => {
             let { url, description } = args;
             description = validator.trim(description);
             url = validator.trim(url);
             if (!validator.isURL(url)) {
-                return Promise.reject(new GraphQLError(`Cannot post link on uri format '${url}'.`));
+                return Promise.reject(createGraphQLError(`Cannot post link on uri format '${url}'.`)
+                // new GraphQLError(`Cannot post link on uri format '${url}'.`)
+                );
             }
             return context.prisma.link.create({
                 data: {
@@ -98,15 +129,19 @@ const resolvers = {
                 }
             });
         },
-        async postCommentOnLink(parent, args, context) {
+        postCommentOnLink: async (parent, args, context) => {
             let { body } = args;
             const linkId = parseIntSafe(args.linkId);
             if (linkId === null) {
-                return Promise.reject(new GraphQLError(`Cannot post comment on non-existing link with id '${args.linkId}'.`));
+                return Promise.reject(createGraphQLError(`Cannot post comment on non-existing link with id '${args.linkId}'.`)
+                // new GraphQLError(`Cannot post comment on non-existing link with id '${args.linkId}'.`)
+                );
             }
             body = validator.trim(body);
             if (validator.isEmpty(body)) {
-                return Promise.reject(new GraphQLError(`Cannot post empty comment.`));
+                return Promise.reject(createGraphQLError(`Cannot post empty comment.`)
+                // new GraphQLError(`Cannot post empty comment.`)
+                );
             }
             return context.prisma.comment
                 .create({
@@ -117,7 +152,9 @@ const resolvers = {
             })
                 .catch((err) => {
                 if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2003') {
-                    return Promise.reject(new GraphQLError(`Cannot post comment on non-existing link with id '${args.linkId}'.`));
+                    return Promise.reject(createGraphQLError(`Cannot post comment on non-existing link with id '${args.linkId}'.`)
+                    // new GraphQLError(`Cannot post comment on non-existing link with id '${args.linkId}'.`)
+                    );
                 }
                 return Promise.reject(err);
             });

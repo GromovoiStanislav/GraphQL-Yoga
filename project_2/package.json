@@ -15,7 +15,6 @@
   "dependencies": {
     "@prisma/client": "^4.15.0",
     "@types/validator": "^13.7.17",
-    "graphql": "^16.6.0",
     "graphql-yoga": "^4.0.1",
     "validator": "^13.9.0"
   },
