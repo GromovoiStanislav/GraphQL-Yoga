@@ -1,9 +1,5 @@
 //import { makeExecutableSchema } from '@graphql-tools/schema'
-import {createSchema} from "graphql-yoga";
-import type {GraphQLContext} from './context.js'
-import type {Link, Comment} from '@prisma/client'
-
-
+import { createSchema } from "graphql-yoga";
 const typeDefs = `
       type Link {
         id: ID!
@@ -31,93 +27,73 @@ const typeDefs = `
         postCommentOnLink(linkId: ID!, body: String!): Comment!
       }
       
-    `
-
-
+    `;
 const resolvers = {
     Query: {
         hello: () => 'Hello from Yoga!',
-
-        async links(parent: unknown, args: {}, context: GraphQLContext) {
+        async links(parent, args, context) {
             return context.prisma.link.findMany();
         },
-
-        async link(parent: unknown, args: { id: string }, context: GraphQLContext) {
+        async link(parent, args, context) {
             return context.prisma.link.findUnique({
-                where: {id: parseInt(args.id)}
-            })
+                where: { id: parseInt(args.id) }
+            });
         },
-
-        async comments(parent: unknown, args: {}, context: GraphQLContext) {
+        async comments(parent, args, context) {
             return context.prisma.comment.findMany();
         },
-
-        async comment(parent: unknown, args: { id: string }, context: GraphQLContext) {
+        async comment(parent, args, context) {
             return context.prisma.comment.findUnique({
-                where: {id: parseInt(args.id)}
-            })
+                where: { id: parseInt(args.id) }
+            });
         }
     },
-
     Link: {
-        id: (parent: Link) => parent.id,
-        description: (parent: Link) => parent.description,
-        url: (parent: Link) => parent.url,
-        comments: async (parent: Link, args: {}, context: GraphQLContext) => {
+        id: (parent) => parent.id,
+        description: (parent) => parent.description,
+        url: (parent) => parent.url,
+        comments: async (parent, args, context) => {
             return context.prisma.comment.findMany({
                 where: {
                     linkId: parent.id
                 }
-            })
+            });
         },
     },
     Comment: {
-        id: (parent: Comment) => parent.id,
-        body: (parent: Comment) => parent.body,
-        link: async (parent: Comment, args: {}, context: GraphQLContext) => {
+        id: (parent) => parent.id,
+        body: (parent) => parent.body,
+        link: async (parent, args, context) => {
             return context.prisma.link.findUnique({
                 where: {
                     id: parent.linkId
                 }
-            })
+            });
         },
     },
-
-
     Mutation: {
-        async postLink(
-            parent: unknown,
-            args: { description: string; url: string },
-            context: GraphQLContext
-        ) {
+        async postLink(parent, args, context) {
             const newLink = await context.prisma.link.create({
                 data: {
                     url: args.url,
                     description: args.description
                 }
-            })
-            return newLink
+            });
+            return newLink;
         },
-
-        async postCommentOnLink(
-            parent: unknown,
-            args: { linkId: string; body: string },
-            context: GraphQLContext
-        ) {
+        async postCommentOnLink(parent, args, context) {
             const newComment = await context.prisma.comment.create({
                 data: {
                     linkId: parseInt(args.linkId),
                     body: args.body
                 }
-            })
-            return newComment
+            });
+            return newComment;
         }
     }
-}
-
+};
 // export const schema = makeExecutableSchema({
 //     resolvers: [resolvers],
 //     typeDefs: [typeDefinitions]
 // })
-
-export const schema = createSchema({typeDefs, resolvers})
+export const schema = createSchema({ typeDefs, resolvers });

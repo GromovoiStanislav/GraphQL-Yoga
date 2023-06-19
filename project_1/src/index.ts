@@ -20,25 +20,25 @@ const links: Link[] = [
 const yoga = createYoga({
     schema: createSchema({
         typeDefs: `
-      type Link {
-        id: ID!
-        description: String!
-        url: String!
-      }
-      
-      type Query {
-        hello: String
-        feed: [Link!]!
-      }
-      
-      type Mutation {
-        postLink(url: String!, description: String!): Link
-      }
-      
-      type Subscription {
-        countdown(from: Int!): Int!
-      }
-    `,
+          type Link {
+            id: ID!
+            description: String!
+            url: String!
+          }
+          
+          type Query {
+            hello: String
+            feed: [Link!]!
+          }
+          
+          type Mutation {
+            postLink(url: String!, description: String!): Link
+          }
+          
+          type Subscription {
+            countdown(from: Int!): Int!
+          }
+        `,
         resolvers: {
             Query: {
                 hello: () => 'Hello from Yoga!',
@@ -50,7 +50,7 @@ const yoga = createYoga({
                 url: (parent: Link) => parent.url
             },
             Mutation: {
-                postLink: (parent: unknown, args: { description: string; url: string })  => {
+                postLink: (parent: unknown, args: { description: string; url: string }) => {
                     const link = {
                         id: `link-${links.length}`,
                         description: args.description,
@@ -71,11 +71,7 @@ const yoga = createYoga({
                     }
                 }
             }
-
-
         },
-
-
     })
 })
 

@@ -64,11 +64,7 @@ const yoga = createYoga({
                     }
                 }
             }
-
-
         },
-
-
     })
 })
 
