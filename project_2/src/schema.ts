@@ -8,6 +8,18 @@ import validator from 'validator';
 
 
 const typeDefs = `
+      input LinkOrderByInput {
+         description: Sort
+         url: Sort
+         createdAt: Sort
+      }
+         
+      enum Sort {
+         asc
+         desc
+      }
+
+
       type Link {
         id: ID!
         description: String!
@@ -23,7 +35,12 @@ const typeDefs = `
       
       type Query {
         hello: String!
-        links(filterNeedle: String, skip: Int, take: Int): [Link!]!
+        links(
+        filter: String,
+          skip: Int
+          take: Int
+          orderBy: LinkOrderByInput
+         ): [Link!]!
         link(id: ID): Link
         comments: [Comment!]!
         comment(id: ID!): Comment
@@ -57,7 +74,7 @@ const applyTakeConstraints = (params: { min: number, max: number, value: number 
     return params.value
 }
 
-const applySkipConstraints = (value: number ) => {
+const applySkipConstraints = (value: number) => {
     if (value < 0) {
         throw createGraphQLError(
             `'skip' argument value '${value}' is less of 0.`,
@@ -71,12 +88,23 @@ const resolvers = {
     Query: {
         hello: () => 'Hello from Yoga!',
 
-        links: async (parent: unknown, args: { filterNeedle?: string, skip?: number, take?: number }, context: GraphQLContext) => {
-            const where = args.filterNeedle
+        links: async (parent: unknown,
+                      args: {
+                          filter?: string,
+                          skip?: number,
+                          take?: number,
+                          orderBy?: {
+                              description?: Prisma.SortOrder
+                              url?: Prisma.SortOrder
+                              createdAt?: Prisma.SortOrder
+                          }
+                      },
+                      context: GraphQLContext) => {
+            const where = args.filter
                 ? {
                     OR: [
-                        {description: {contains: args.filterNeedle}},
-                        {url: {contains: args.filterNeedle}}
+                        {description: {contains: args.filter}},
+                        {url: {contains: args.filter}}
                     ]
                 }
                 : {}
@@ -88,11 +116,11 @@ const resolvers = {
             })
             const skip = applySkipConstraints(args.skip ?? 0)
 
-
             return context.prisma.link.findMany({
                 where,
-                skip: args.skip,
-                take
+                skip,
+                take,
+                orderBy: args.orderBy
             });
         },
 

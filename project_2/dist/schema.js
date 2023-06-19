@@ -3,6 +3,18 @@ import { createGraphQLError, createSchema } from "graphql-yoga";
 import { Prisma } from "@prisma/client";
 import validator from 'validator';
 const typeDefs = `
+      input LinkOrderByInput {
+         description: Sort
+         url: Sort
+         createdAt: Sort
+      }
+         
+      enum Sort {
+         asc
+         desc
+      }
+
+
       type Link {
         id: ID!
         description: String!
@@ -18,7 +30,12 @@ const typeDefs = `
       
       type Query {
         hello: String!
-        links(filterNeedle: String, skip: Int, take: Int): [Link!]!
+        links(
+        filter: String,
+          skip: Int
+          take: Int
+          orderBy: LinkOrderByInput
+         ): [Link!]!
         link(id: ID): Link
         comments: [Comment!]!
         comment(id: ID!): Comment
@@ -55,11 +72,11 @@ const resolvers = {
     Query: {
         hello: () => 'Hello from Yoga!',
         links: async (parent, args, context) => {
-            const where = args.filterNeedle
+            const where = args.filter
                 ? {
                     OR: [
-                        { description: { contains: args.filterNeedle } },
-                        { url: { contains: args.filterNeedle } }
+                        { description: { contains: args.filter } },
+                        { url: { contains: args.filter } }
                     ]
                 }
                 : {};
@@ -71,8 +88,9 @@ const resolvers = {
             const skip = applySkipConstraints(args.skip ?? 0);
             return context.prisma.link.findMany({
                 where,
-                skip: args.skip,
-                take
+                skip,
+                take,
+                orderBy: args.orderBy
             });
         },
         link: async (parent, args, context) => {
