@@ -1,7 +1,10 @@
 //import { makeExecutableSchema } from '@graphql-tools/schema'
 import {createSchema} from "graphql-yoga";
+import {GraphQLError} from 'graphql'
 import type {GraphQLContext} from './context.js'
-import type {Link, Comment} from '@prisma/client'
+import type {Comment, Link} from '@prisma/client'
+import {Prisma} from "@prisma/client";
+import validator from 'validator';
 
 
 const typeDefs = `
@@ -32,6 +35,19 @@ const typeDefs = `
       }
       
     `
+
+
+const parseIntSafe = (value: string): number | null => {
+    // if (/^(\d+)$/.test(value)) {
+    //     return parseInt(value, 10)
+    // }
+
+    if (validator.isInt(value)) {
+        return validator.toInt(value)
+    }
+
+    return null
+}
 
 
 const resolvers = {
@@ -90,27 +106,64 @@ const resolvers = {
             args: { description: string; url: string },
             context: GraphQLContext
         ) {
-            const newLink = await context.prisma.link.create({
+            let {url, description} = args
+
+            description = validator.trim(description)
+            url = validator.trim(url)
+
+            if (!validator.isURL(url)) {
+                return Promise.reject(
+                    new GraphQLError(`Cannot post link on uri format '${url}'.`)
+                )
+            }
+
+            return context.prisma.link.create({
                 data: {
-                    url: args.url,
-                    description: args.description
+                    url,
+                    description
                 }
             })
-            return newLink
         },
+
 
         async postCommentOnLink(
             parent: unknown,
             args: { linkId: string; body: string },
             context: GraphQLContext
         ) {
-            const newComment = await context.prisma.comment.create({
-                data: {
-                    linkId: parseInt(args.linkId),
-                    body: args.body
-                }
-            })
-            return newComment
+            let {body} = args
+
+            const linkId = parseIntSafe(args.linkId)
+            if (linkId === null) {
+                return Promise.reject(
+                    new GraphQLError(`Cannot post comment on non-existing link with id '${args.linkId}'.`)
+                )
+            }
+
+            body = validator.trim(body)
+            if (validator.isEmpty(body)){
+                return Promise.reject(
+                    new GraphQLError(`Cannot post empty comment.`)
+                )
+            }
+
+
+
+            return context.prisma.comment
+                .create({
+                    data: {
+                        linkId,
+                        body: args.body
+                    }
+                })
+                .catch((err: unknown) => {
+                    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2003') {
+                        return Promise.reject(
+                            new GraphQLError(`Cannot post comment on non-existing link with id '${args.linkId}'.`)
+                        )
+                    }
+                    return Promise.reject(err)
+                })
         }
     }
 }

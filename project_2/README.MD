@@ -1,4 +1,17 @@
-## GraphQL-Yoga with Prisma (ts)
+## GraphQL-Yoga (ts) with Prisma, ErrorHandling, Validator
+
+
+Prisma:
+```
+npm i prisma -D
+npm i @prisma/client
+npx prisma init
+npx prisma migrate dev --name init
+
+npx prisma generate
+npx prisma studio
+```
+
 
 ```
 query {
