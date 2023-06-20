@@ -1,9 +1,8 @@
 //import { makeExecutableSchema } from '@graphql-tools/schema'
 import {createGraphQLError, createSchema} from "graphql-yoga";
 //import {GraphQLError} from 'graphql'
-import type {GraphQLContext} from './context.js'
-import type {Comment, Link} from '@prisma/client'
-import {Prisma} from "@prisma/client";
+import {GraphQLContext} from './context.js'
+import {Prisma, Comment, Link} from '@prisma/client'
 import validator from 'validator';
 
 
