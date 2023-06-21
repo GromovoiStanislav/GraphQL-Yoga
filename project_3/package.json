@@ -13,6 +13,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@graphql-tools/schema": "^10.0.0",
     "@prisma/client": "^4.15.0",
     "@types/validator": "^13.7.17",
     "bcryptjs": "^2.4.3",

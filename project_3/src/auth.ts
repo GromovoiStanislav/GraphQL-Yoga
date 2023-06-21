@@ -8,7 +8,7 @@ export async function authenticateUser(prisma: PrismaClient, request: Request): 
         const token = header.split(' ')[1]
         const tokenPayload = jsonwebtoken.verify(token, process.env.JWT_SECRET) as jsonwebtoken.JwtPayload
         const userId = tokenPayload.userId
-        return await prisma.user.findUnique({ where: { id: userId } })
+        return prisma.user.findUnique({ where: { id: userId } })
     }
     return null
 }

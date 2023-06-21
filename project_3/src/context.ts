@@ -1,18 +1,21 @@
 import {PrismaClient, User} from '@prisma/client'
-import {authenticateUser} from './auth.js'
 import {YogaInitialContext} from "graphql-yoga";
+import {authenticateUser} from './auth.js'
+import {pubSub} from './pubsub.js'
 
 const prisma = new PrismaClient()
 
 export type GraphQLContext = {
     prisma: PrismaClient
     currentUser: null | User
+    pubSub: typeof pubSub
 }
 
 
 export async function createContext(initialContext: YogaInitialContext): Promise<GraphQLContext> {
     return {
         prisma,
-        currentUser: await authenticateUser(prisma, initialContext.request)
+        currentUser: await authenticateUser(prisma, initialContext.request),
+        pubSub
     }
 }

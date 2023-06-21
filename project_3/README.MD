@@ -1,7 +1,7 @@
-## GraphQL-Yoga (ts) with Prisma, Authentication, ErrorHandling, Validation
-
+## GraphQL-Yoga (ts) with Prisma, Authentication, Subscription, ErrorHandling, Validation
 
 Prisma:
+
 ```
 npm i prisma -D
 npm i @prisma/client
@@ -11,7 +11,6 @@ npx prisma migrate dev --name init
 npx prisma generate
 npx prisma studio
 ```
-
 
 ```
 query {
@@ -25,6 +24,11 @@ query {
       id
       name
     }
+    votes {
+      user {
+        name
+      }
+    }
   } 
   
   link(id: 1){
@@ -34,7 +38,13 @@ query {
       id
       name
     }
+    votes {
+      user {
+        name
+      }
+    }
   }  
+  
 }
 
 mutation {
@@ -59,12 +69,30 @@ mutation {
   }
 }
 
-mutation {
-  postLink(
-    url: "www.prisma.io"
-    description: "Prisma replaces traditional ORMs"
-  ) {
+subscription {
+  newLink {
     id
+    url
+    description
+    postedBy {
+      id
+      name
+      email
+    }
+  }
+}
+
+subscription {
+  newVote {
+    id
+    link {
+      url
+      description
+    }
+    user {
+      name
+      email
+    }
   }
 }
 
@@ -85,6 +113,20 @@ mutation {
     description: "An awesome GraphQL conference"
   ) {
     id
+  }
+}
+
+mutation {
+  vote(linkId: 1) {
+    id
+    link {
+      id
+      description
+    }
+    user {
+      id
+      name
+    }
   }
 }
 ```
