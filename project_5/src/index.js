@@ -2,8 +2,8 @@ import {createSchema, createYoga} from 'graphql-yoga'
 import {createServer} from 'node:http'
 import "./database.js";
 
-import {typeDefs} from "./typeDefs.js";
-import {resolvers} from "./resolvers.js";
+import {typeDefs} from "./graphql/typeDefs.js";
+import {resolvers} from "./graphql/resolvers.js";
 
 const yoga = createYoga({
     schema: createSchema({

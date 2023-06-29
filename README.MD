@@ -6,3 +6,4 @@
 - 3 - GraphQL-Yoga (ts) with Prisma, Authentication, Subscription, ErrorHandling, Validation
 - 4 - GraphQL-Yoga (js) api-request-graphql for https://swapi.dev/api/
 - 5 - GraphQL Yoga (js) with Mongoose
+- 6 - GraphQL Yoga (js) with Mongoose
