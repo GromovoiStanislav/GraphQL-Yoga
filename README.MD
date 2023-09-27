@@ -11,3 +11,4 @@
 - 8 - GraphQL Yoga - subscription (TS/JS)
 - 9 - GraphQL Yoga - subscription (TS/JS)
 - 10 - GraphQL Yoga - subscription (TS/JS)
+- 11 - GraphQL Yoga with axios (TS/JS)
