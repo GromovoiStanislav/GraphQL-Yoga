@@ -10,7 +10,7 @@ type Todo = {
 };
 
 type PubSubChannels = {
-  TODOS_CHANNEL: [{ todos: [Todo] }];
+  TODOS_CHANNEL: [{ todos: Todo[] }];
 };
 
 const pubSub = createPubSub<PubSubChannels>();
@@ -19,7 +19,7 @@ type GraphQLContext = {
   pubSub: typeof pubSub;
 };
 
-let todos: [Todo] = [
+const todos: Todo[] = [
   {
     id: '1',
     text: 'Learn GraphQL + Soild',

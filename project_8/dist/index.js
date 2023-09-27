@@ -2,7 +2,7 @@ import { createSchema, createYoga, createPubSub } from 'graphql-yoga';
 import { createServer } from 'node:http';
 const TODOS_CHANNEL = 'TODOS_CHANNEL';
 const pubSub = createPubSub();
-let todos = [
+const todos = [
     {
         id: '1',
         text: 'Learn GraphQL + Soild',
