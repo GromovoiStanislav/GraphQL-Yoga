@@ -9,3 +9,4 @@
 - 6 - GraphQL Yoga with Mongoose (JS)
 - 7 - GraphQL Yoga relationships - example (JS)
 - 8 - GraphQL Yoga - subscription (TS/JS)
+- 9 - GraphQL Yoga - subscription (TS/JS)
